@@ -27,6 +27,13 @@ def create_app(config: dict | None = None) -> Flask:
     migrate.init_app(app, db)
     login_manager.init_app(app)
 
-    from app import models  # noqa: F401
+    from app import models
+    from app.routes import main
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return db.session.get(models.User, int(user_id))
+
+    app.register_blueprint(main)
 
     return app
