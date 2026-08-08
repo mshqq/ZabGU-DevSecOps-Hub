@@ -1,0 +1,16 @@
+alembic==1.19.0
+blinker==1.9.0
+click==8.4.2
+flask==3.1.3
+flask-login==0.6.3
+flask-migrate==4.1.0
+flask-sqlalchemy==3.1.1
+greenlet==3.5.4
+itsdangerous==2.2.0
+jinja2==3.1.6
+mako==1.4.1
+markupsafe==3.0.3
+python-dotenv==1.2.2
+sqlalchemy==2.0.51
+typing-extensions==4.16.0
+werkzeug==3.1.8
