@@ -3,6 +3,7 @@ import os
 from flask import Flask
 
 from app.extensions import db, login_manager, migrate
+from app.routes.auth import auth_bp
 
 
 def create_app(config: dict | None = None) -> Flask:
@@ -35,5 +36,6 @@ def create_app(config: dict | None = None) -> Flask:
         return db.session.get(models.User, int(user_id))
 
     app.register_blueprint(main)
+    app.register_blueprint(auth_bp)
 
     return app
