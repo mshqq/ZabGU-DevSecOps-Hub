@@ -16,13 +16,13 @@ def register():
     if not data:
         return jsonify({"error": "запрос не содержит json"}), 400
     email = data.get("email")
-    if "@" not in email:
-        return jsonify({"error": "неверный формат email"}), 400
     password = data.get("password")
-    if len(password) < 8:
-        return jsonify({"error": "Пароль должен быть не менее 8 символов"}), 400
     if not email or not password:
         return jsonify({"error": "неверный логин или пароль"}), 400
+    if "@" not in email:
+        return jsonify({"error": "неверный формат email"}), 400
+    if len(password) < 8:
+        return jsonify({"error": "Пароль должен быть не менее 8 символов"}), 400
     # pyrefly: ignore [unexpected-keyword]
     user = User(email=email)
     user.set_password(password)
@@ -49,7 +49,7 @@ def login():
     if not email or not password:
         return jsonify({"error": "не указан логин или пароль"}), 400
     user = User.query.filter_by(email=email).first()
-    if not user.check_password(password) or not user:
+    if not user or not user.check_password(password):
         return jsonify({"error": "неверный логин или пароль"}), 401
     login_user(user)
     return jsonify({"message": "Успешный вход"}), 200
