@@ -1,3 +1,5 @@
+import secrets
+
 from app.extensions import db
 from app.utils import utcnow
 
@@ -22,3 +24,6 @@ class Project(db.Model):
     )
 
     __table_args__ = (db.UniqueConstraint("owner_id", "repo_url"),)
+
+    def create_ownership_token(self):
+        self.ownership_token = secrets.token_urlsafe(16)
