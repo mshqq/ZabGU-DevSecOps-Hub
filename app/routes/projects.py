@@ -13,6 +13,8 @@ projects_bp = Blueprint("projects", __name__)
 def projects():
     if request.method == "GET":
         projects = Project.query.filter_by(owner_id=current_user.id).all()
+        if not projects:
+            return jsonify({"error": "Нет добавленных проектов"}), 400
         return jsonify(
             {
                 p.id: {"title": p.title, "repo_url": p.repo_url, "provider": p.provider}
