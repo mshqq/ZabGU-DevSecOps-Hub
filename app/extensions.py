@@ -8,9 +8,12 @@ from sqlalchemy.engine import Engine
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
+
+
 @login_manager.unauthorized_handler
 def unauthorized():
     return jsonify({"error": "Пользователь не авторизован"}), 401
+
 
 @event.listens_for(Engine, "connect")
 def _sqlite_pragmas(dbapi_conn, _):
