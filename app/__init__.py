@@ -5,6 +5,7 @@ from flask import Flask
 from app.extensions import db, login_manager, migrate
 from app.routes.auth import auth_bp
 from app.routes.projects import projects_bp
+from app.routes.scan import scan_bp
 
 
 def create_app(config: dict | None = None) -> Flask:
@@ -39,5 +40,6 @@ def create_app(config: dict | None = None) -> Flask:
     app.register_blueprint(main)
     app.register_blueprint(auth_bp)
     app.register_blueprint(projects_bp)
+    app.register_blueprint(scan_bp)
 
     return app
