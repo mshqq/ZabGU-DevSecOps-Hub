@@ -38,7 +38,10 @@ def projects():
         return jsonify({"error": "Неизвестный провайдер"}), 400
     owner_id = current_user.id
     project = Project(
-        title=title, repo_url=repo_url, provider=provider, owner_id=owner_id
+        title=title,
+        repo_url=repo_url,
+        provider=provider,
+        owner_id=owner_id,
     )
     project.create_ownership_token()
     try:
