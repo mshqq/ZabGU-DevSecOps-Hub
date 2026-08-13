@@ -15,7 +15,7 @@ def list_files(repo_path: str) -> list[str]:
                 continue
 
             rel_path: str = os.path.relpath(file_path, repo_path)
-            files.append(rel_path)
+            files.append(rel_path.replace(os.sep, "/"))
 
     files.sort()
     return files

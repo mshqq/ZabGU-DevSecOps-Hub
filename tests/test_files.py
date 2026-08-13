@@ -1,5 +1,3 @@
-import os
-
 from app.scanner.files import list_files
 
 
@@ -33,8 +31,8 @@ def test_nested_dir(tmp_path):
     assert result == sorted(
         [
             ".env",
-            os.path.join("app", "models", "user.py"),
-            os.path.join("app", "config.py"),
+            "app/models/user.py",
+            "app/config.py",
         ]
     )
 
@@ -59,7 +57,7 @@ def test_symlink(tmp_path):
 
     result: list[str] = list_files(str(tmp_path))
 
-    assert result == [os.path.join("target", "inner.txt")]
+    assert result == ["target/inner.txt"]
 
 
 def test_symlink_to_file_outside_repo(tmp_path, tmp_path_factory):
