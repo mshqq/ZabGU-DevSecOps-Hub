@@ -5,3 +5,5 @@ __pycache__/
 *.py[cod]
 instance/
 *.db
+
+!tests/test-repo/.env
