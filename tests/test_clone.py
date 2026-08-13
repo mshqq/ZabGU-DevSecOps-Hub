@@ -2,8 +2,9 @@ import os
 
 import pytest
 
+import app.scanner.clone as clone_module
 from app.scanner.clone import _is_allowed_url, cleanup, clone_repo
-from app.scanner.exceptions import RepoCloneError
+from app.scanner.exceptions import RepoCloneError, RepoTooLargeError
 
 
 def test_clone_repo_real_github():
@@ -59,3 +60,14 @@ def test_cleanup_nonexistent_path_does_not_raise(tmp_path):
     missing_dir = tmp_path / "missing"
 
     cleanup(str(missing_dir))
+
+
+def test_clone_repo_too_large():
+    original_max = clone_module.MAX_REPO_SIZE_MB
+    clone_module.MAX_REPO_SIZE_MB = 0
+
+    try:
+        with pytest.raises(RepoTooLargeError):
+            clone_repo(url="https://github.com/mshqq/mshqq.git")
+    finally:
+        clone_module.MAX_REPO_SIZE_MB = original_max
