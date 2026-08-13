@@ -33,7 +33,7 @@ def register():
     except IntegrityError:
         db.session.rollback()
         return jsonify({"error": "Пользователь с таким email уже существует"}), 400
-
+    login_user(user)
     return jsonify({"message": "Пользователь создан"}), 201
 
 
