@@ -17,6 +17,19 @@ def test_clone_repo_real_github():
         cleanup(path)
 
 
+def test_clone_repo_specific_commit():
+    commit_sha = "bce38ad98aa578b9603d84ef74505c60ceb287ef"
+
+    path, sha = clone_repo(
+        url="https://github.com/mshqq/mshqq.git", commit_sha=commit_sha
+    )
+    try:
+        assert os.path.isdir(path)
+        assert sha == commit_sha
+    finally:
+        cleanup(path)
+
+
 def test_clone_nonexist_repo_raises():
     with pytest.raises(RepoCloneError):
         clone_repo(url="https://github.com/nonexist/nonexist-repo.git")
