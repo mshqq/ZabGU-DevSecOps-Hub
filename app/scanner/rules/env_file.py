@@ -31,7 +31,7 @@ class EnvFileRule(Rule):
     confidence = "high"
     source = "regex"
 
-    def scan(self, ctx: ScanContext):
+    def scan(self, ctx: ScanContext) -> list[dict]:
         findings: list = []
 
         for rel_path in ctx.files:

@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 
 from app.scanner.base import ScanContext
@@ -9,9 +7,7 @@ from app.scanner.rules.env_file import (
     _is_env_filename,
     _strip_quotes,
 )
-
-here: Path = Path(__file__).resolve().parent
-test_repo_folder: Path = here / "test-repo"
+from tests.utils import get_test_folder_path
 
 
 @pytest.mark.parametrize(
@@ -69,7 +65,7 @@ def test_strip_quotes(value, correct_value):
 
 def _run_scan():
     sc = ScanContext(
-        str(test_repo_folder),
+        str(get_test_folder_path()),
         "abcd",
         [
             ".env",
