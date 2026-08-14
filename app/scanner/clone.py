@@ -67,7 +67,6 @@ def _is_allowed_url(url: str) -> bool:
 
 
 def clone_repo(url: str, commit_sha: str | None = None) -> tuple[str, str]:
-
     if not _is_allowed_url(url):
         raise RepoCloneError("URL не разрешён (нужен http(s):// или git@host:...)")
 
