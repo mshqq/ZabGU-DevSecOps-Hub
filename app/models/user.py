@@ -19,11 +19,11 @@ class User(UserMixin, db.Model):
         "Project", back_populates="owner", cascade="all, delete-orphan"
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<User {self.id}>"
 
-    def set_password(self, password):
+    def set_password(self, password) -> None:
         self.password_hash = generate_password_hash(password)
 
-    def check_password(self, password):
+    def check_password(self, password) -> bool:
         return check_password_hash(self.password_hash, password)
