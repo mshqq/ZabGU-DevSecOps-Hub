@@ -2,7 +2,7 @@ import os
 
 from app.scanner.base import Rule, ScanContext
 
-SAFE_ENV_FILES: tuple[str] = (".env.example", ".env.sample", ".env.template")
+SAFE_ENV_FILES: tuple[str, str, str] = (".env.example", ".env.sample", ".env.template")
 
 MAX_ENV_FILE_SIZE: int = 200 * 1024
 
@@ -32,7 +32,7 @@ class EnvFileRule(Rule):
     source = "regex"
 
     def scan(self, ctx: ScanContext) -> list[dict]:
-        findings: list = []
+        findings: list[dict] = []
 
         for rel_path in ctx.files:
             file_name = _basename(rel_path)
@@ -67,8 +67,8 @@ class EnvFileRule(Rule):
             except ValueError:
                 continue
 
-            key: str = key.strip()
-            value: str = _strip_quotes(value.strip())
+            key = key.strip()
+            value = _strip_quotes(value.strip())
 
             if not value:
                 continue

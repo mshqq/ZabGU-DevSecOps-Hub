@@ -25,5 +25,5 @@ class Project(db.Model):
 
     __table_args__ = (db.UniqueConstraint("owner_id", "repo_url"),)
 
-    def create_ownership_token(self):
+    def create_ownership_token(self) -> None:
         self.ownership_token = secrets.token_urlsafe(16)
