@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, render_template
 from flask_login import current_user, login_required
 from sqlalchemy.orm import joinedload
 
@@ -14,10 +14,10 @@ scan_bp = Blueprint("scan", __name__)
 @scan_bp.route("/api/scans/<int:scan_id>", methods=["GET"])
 @login_required
 def scan_status(scan_id):
-    scan = Scan.query.filter(
-        Scan.id == scan_id, Project.owner_id == current_user.id
-    ).first()
-    if not scan:
+    scan = (
+        Scan.query.options(joinedload(Scan.project)).filter(Scan.id == scan_id).first()
+    )
+    if not scan or scan.project.owner_id != current_user.id:
         return jsonify({"error": "Данного скана не существует"}), 404
     return jsonify(
         {
@@ -32,20 +32,28 @@ def scan_status(scan_id):
     ), 200
 
 
-@scan_bp.route("/api/scans/<int:scan_id>/report", methods=["GET"])
-@login_required
-def report_json(scan_id):
+def group_sort_severity(findings):
+    grouped = defaultdict(list)
+    for f in findings:
+        grouped[f["severity"]].append(f)
+    for finding_list in grouped.values():
+        finding_list.sort(key=lambda x: x["file_path"])
+    summary = {
+        severity: len(finding_list) for severity, finding_list in grouped.items()
+    }
+    return dict(grouped), summary
+
+
+def findings(scan_id):
     scan = (
-        Scan.query.options(joinedload(Scan.project))
-        .filter(Scan.id == scan_id, Project.owner_id == current_user.id)
-        .first()
+        Scan.query.options(joinedload(Scan.project)).filter(Scan.id == scan_id).first()
     )
-    if not scan:
-        return jsonify({"error": "Данного скана не существует"}), 404
+    if not scan or scan.project.owner_id != current_user.id:
+        return None, None, (jsonify({"error": "Данного скана не существует"}), 404)
     if scan.status == "failed":
-        return jsonify({"error": scan.error_message}), 409
+        return None, None, (jsonify({"error": scan.error_message}), 409)
     if scan.status != "done":
-        return jsonify({"status": scan.status}), 409
+        return None, None, (jsonify({"status": scan.status}), 409)
     finding = Finding.query.filter(
         Scan.id == scan_id, Project.owner_id == current_user.id
     ).all()
@@ -66,20 +74,17 @@ def report_json(scan_id):
             }
             for f in finding
         ]
-
-    def group_sort_severity(findings):
-        grouped = defaultdict(list)
-        for f in findings:
-            grouped[f["severity"]].append(f)
-        for finding_list in grouped.values():
-            finding_list.sort(key=lambda x: x["file_path"])
-        summary = {
-            severity: len(finding_list) for severity, finding_list in grouped.items()
-        }
-        return dict(grouped), summary
-
     grouped, summary = group_sort_severity(findings)
+    return scan, (summary, grouped), None
 
+
+@scan_bp.route("/api/scans/<int:scan_id>/report", methods=["GET"])
+@login_required
+def report_json(scan_id):
+    scan, data, err = findings(scan_id)
+    if err:
+        return err
+    summary, grouped = data
     return jsonify(
         {
             "scan_id": scan.id,
@@ -91,3 +96,23 @@ def report_json(scan_id):
             "findings": grouped,
         }
     )
+
+
+@scan_bp.route("/api/scans/<int:scan_id>/report.md", methods=["GET"])
+@login_required
+def report_md(scan_id):
+    scan, data, err = findings(scan_id)
+    if err:
+        return err
+    summary, grouped = data
+    context = {
+        "summary": summary,
+        "grouped": grouped,
+        "project_title": scan.project.title,
+        "repo_url": scan.project.repo_url,
+        "scan_id": scan.id,
+        "commit_sha": scan.commit_sha,
+        "finished_at": scan.finished_at,
+        "truncated": scan.truncated,
+    }
+    return render_template("/reports/scan_report.md", **context)
