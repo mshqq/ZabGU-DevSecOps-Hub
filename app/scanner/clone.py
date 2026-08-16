@@ -2,24 +2,22 @@ import os
 import shutil
 import subprocess
 import tempfile
-from urllib.parse import urlparse
 
 from app.scanner.exceptions import RepoCloneError, RepoTooLargeError
+from app.utils import is_allowed_url
 
 SCAN_TEMP_DIR = ""
 
 MAX_REPO_SIZE_MB = 500
 GIT_TIMEOUT_SECONDS = 30
 
-ALLOWED_HOSTS = ("github.com", "gitlab.com")
-
 
 def _check_repo_size(path: str) -> int:
-    total = 0
+    total: int = 0
 
     for dirpath, dirnames, filenames in os.walk(path, followlinks=False):
         for name in filenames:
-            file_path = os.path.join(dirpath, name)
+            file_path: str = os.path.join(dirpath, name)
             if os.path.islink(file_path):
                 continue
             try:
@@ -47,27 +45,8 @@ def _run_git(args: list[str], cwd: str, timeout: int) -> None:
         raise RepoCloneError(f"git {' '.join(args)} timed out after {timeout}s") from e
 
 
-def _is_allowed_url(url: str) -> bool:
-    if not url:
-        return False
-
-    parsed = urlparse(url)
-    if parsed.scheme in ("http", "https"):
-        host = parsed.hostname
-
-        return host is not None and host.lower() in ALLOWED_HOSTS
-
-    if url.startswith("git@"):
-        rest = url[len("git@") :]
-        host, sep, path = rest.partition(":")
-
-        return bool(sep) and bool(host) and bool(path) and host.lower() in ALLOWED_HOSTS
-
-    return False
-
-
 def clone_repo(url: str, commit_sha: str | None = None) -> tuple[str, str]:
-    if not _is_allowed_url(url):
+    if not is_allowed_url(url):
         raise RepoCloneError("URL не разрешён (нужен http(s):// или git@host:...)")
 
     ref: str = commit_sha or "HEAD"
@@ -83,10 +62,10 @@ def clone_repo(url: str, commit_sha: str | None = None) -> tuple[str, str]:
         )
         _run_git(["checkout", "FETCH_HEAD"], temp_folder_path, GIT_TIMEOUT_SECONDS)
 
-        resolved_sha = _get_head_sha(temp_folder_path)
+        resolved_sha: str = _get_head_sha(temp_folder_path)
 
-        size_bytes = _check_repo_size(temp_folder_path)
-        max_bytes = MAX_REPO_SIZE_MB * 1024 * 1024
+        size_bytes: int = _check_repo_size(temp_folder_path)
+        max_bytes: int = MAX_REPO_SIZE_MB * 1024 * 1024
 
         if size_bytes > max_bytes:
             raise RepoTooLargeError(
