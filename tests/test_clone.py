@@ -3,8 +3,9 @@ import os
 import pytest
 
 import app.scanner.clone as clone_module
-from app.scanner.clone import _is_allowed_url, cleanup, clone_repo
+from app.scanner.clone import cleanup, clone_repo
 from app.scanner.exceptions import RepoCloneError, RepoTooLargeError
+from app.utils import is_allowed_url
 
 
 def test_clone_repo_real_github():
@@ -56,7 +57,7 @@ def test_clone_nonexist_repo_raises():
     ],
 )
 def test_is_allowed_url(url, status):
-    assert _is_allowed_url(url) is status
+    assert is_allowed_url(url) is status
 
 
 def test_cleanup_removes_directory(tmp_path):
