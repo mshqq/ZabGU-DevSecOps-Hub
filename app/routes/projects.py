@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
 from app.models.project import Project
-from app.utils import utcnow
+from app.utils import is_allowed_url, utcnow
 
 projects_bp = Blueprint("projects", __name__)
 
@@ -34,6 +34,8 @@ def projects():
     provider = data.get("provider")
     if not title or not repo_url:
         return jsonify({"error": "Строки не могут быть пустыми"}), 400
+    if not is_allowed_url(repo_url):
+        return jsonify({"error": "Ссылка не соответствует формату"}), 400
     if provider not in ["github", "gitlab"]:
         return jsonify({"error": "Неизвестный провайдер"}), 400
     owner_id = current_user.id
