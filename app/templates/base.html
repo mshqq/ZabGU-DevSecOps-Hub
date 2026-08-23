@@ -1,18 +1,19 @@
 <!doctype html>
 <html lang="ru">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}ZabGU DevSecOps Hub{% endblock %}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 text-gray-900">
-  <header class="bg-gray-900 text-white px-6 py-4">
-    <a href="/" class="font-semibold">ZabGU DevSecOps Hub</a>
-  </header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}ZabGU DevSecOps Hub{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% block extra_head %}{% endblock extra_head %}
+  </head>
+  <body class="bg-gray-50 text-gray-900">
+    <header class="bg-[#121212] text-white px-6 py-4">
+      <a href="/" class="font-semibold">ZabGU DevSecOps Hub</a>
+    </header>
 
-  <main class="max-w-4xl mx-auto px-6 py-8">
-    {% block content %}{% endblock %}
-  </main>
-</body>
+    <main class="max-w-4xl mx-auto px-6 py-8">
+      {% block content %}{% endblock %}
+    </main>
+  </body>
 </html>

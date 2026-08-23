@@ -1,0 +1,7 @@
+body {
+  background: linear-gradient(135deg, #23194d 0%, #bcb3e5 100%);
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  color: #222222;
+}
