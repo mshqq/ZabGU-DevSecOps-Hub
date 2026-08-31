@@ -55,4 +55,6 @@
     </a>
   </p>
 </div>
-{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+{% endblock %} {% endblock %}
