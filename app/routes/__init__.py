@@ -6,7 +6,9 @@ main = Blueprint("main", __name__)
 
 @main.route("/")
 def index():
-    return render_template("base.html")
+    if current_user.is_authenticated:
+        return redirect(url_for("projects.view_projects"))
+    return redirect(url_for("main.render_login")), 302
 
 
 @main.route("/register")

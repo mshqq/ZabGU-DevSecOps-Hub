@@ -1,7 +1,7 @@
 import urllib
 import urllib.request
 
-from flask import Blueprint, abort, jsonify, request
+from flask import Blueprint, abort, jsonify, render_template, request
 from flask_login import current_user, login_required
 from sqlalchemy.exc import IntegrityError
 
@@ -59,6 +59,12 @@ def projects():
             "ownership_token": project.ownership_token,
         }
     ), 201
+
+
+@projects_bp.route("/projects", methods=["GET"])
+@login_required
+def view_projects():
+    return render_template("projects/list.html"), 200
 
 
 @projects_bp.route("/api/projects/<int:project_id>", methods=["GET"])
