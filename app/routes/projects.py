@@ -1,12 +1,14 @@
 import urllib
 import urllib.request
 
-from flask import Blueprint, abort, jsonify, render_template, request
+from flask import Blueprint, abort, current_app, jsonify, render_template, request
 from flask_login import current_user, login_required
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
 from app.models.project import Project
+from app.models.scan import Scan
+from app.scanner.scan_worker import run_scan
 from app.utils import is_allowed_url, utcnow
 
 projects_bp = Blueprint("projects", __name__)
@@ -40,9 +42,13 @@ def projects():
         return jsonify({"error": "Неизвестный провайдер"}), 400
     owner_id = current_user.id
     project = Project(
+        # pyrefly: ignore [unexpected-keyword]
         title=title,
+        # pyrefly: ignore [unexpected-keyword]
         repo_url=repo_url,
+        # pyrefly: ignore [unexpected-keyword]
         provider=provider,
+        # pyrefly: ignore [unexpected-keyword]
         owner_id=owner_id,
     )
     project.create_ownership_token()
@@ -138,3 +144,29 @@ def project_validate(project_id):
     project.ownership_verified_at = utcnow()
     db.session.commit()
     return jsonify({"message": "Проект успешно подтвержден"}), 200
+
+
+@projects_bp.route("/api/projects/<int:project_id>/scan", methods=["POST"])
+@login_required
+def start_scan(project_id):
+    project = Project.query.get(project_id)
+    if project is None:
+        return jsonify({"error": "Проект не найден"}), 404
+    if project.owner_id != current_user.id:
+        abort(404)
+    if project.ownership_verified_at is None:
+        return jsonify({"error": "Проект не верифицирован"}), 409
+    # pyrefly: ignore [unexpected-keyword]
+    existing = Scan.query.filter(
+        Scan.project_id == project_id,
+        (Scan.status == "queued" or Scan.status == "running"),
+    ).first()
+    if existing:
+        return jsonify({"error": "Скан уже запущен", "id": existing.id}), 409
+    # pyrefly: ignore [unexpected-keyword]
+    scan = Scan(project_id=project_id)
+    scan.status = "queued"
+    db.session.add(scan)
+    db.session.commit()
+    run_scan(current_app._get_current_object(), scan.id)
+    return jsonify({"scan_id": scan.id, "status": "queued"}), 202
