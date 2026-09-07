@@ -159,7 +159,7 @@ def start_scan(project_id):
     # pyrefly: ignore [unexpected-keyword]
     existing = Scan.query.filter(
         Scan.project_id == project_id,
-        (Scan.status == "queued" or Scan.status == "running"),
+        (Scan.status.in_(["queued", "running"])),
     ).first()
     if existing:
         return jsonify({"error": "Скан уже запущен", "id": existing.id}), 409
